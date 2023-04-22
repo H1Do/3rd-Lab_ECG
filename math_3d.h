@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-struct Vector3f { // Вектро в 3-мерном пространстве
+struct Vector3f { // Вектор в 3-мерном пространстве
 	float x, y, z;
 
 	Vector3f() = default;
@@ -13,8 +13,7 @@ struct Vector3f { // Вектро в 3-мерном пространстве
 	Vector3f Cross(const Vector3f& v) const;
 	Vector3f& Normalize();
 
-	Vector3f& operator+=(const Vector3f& r)
-	{
+	Vector3f& operator+=(const Vector3f& r) {
 		x += r.x;
 		y += r.y;
 		z += r.z;
@@ -22,8 +21,7 @@ struct Vector3f { // Вектро в 3-мерном пространстве
 		return *this;
 	}
 
-	Vector3f& operator-=(const Vector3f& r)
-	{
+	Vector3f& operator-=(const Vector3f& r) {
 		x -= r.x;
 		y -= r.y;
 		z -= r.z;
@@ -31,8 +29,7 @@ struct Vector3f { // Вектро в 3-мерном пространстве
 		return *this;
 	}
 
-	Vector3f& operator*=(float f)
-	{
+	Vector3f& operator*=(float f) {
 		x *= f;
 		y *= f;
 		z *= f;

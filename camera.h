@@ -3,7 +3,7 @@
 
 #include "math_3d.h"
 
-class Camera {
+class Camera { // Класс камеры
 public:
 	Camera();
 	Camera(const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up);
