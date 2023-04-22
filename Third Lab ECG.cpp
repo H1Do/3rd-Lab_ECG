@@ -4,6 +4,7 @@
 #include <math.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+
 #include "pipeline.h"
 #include "pipeline.cpp"
 #include "math_3d.h"
@@ -18,7 +19,7 @@ GLuint VBO; // Указатель на буфер вершины
 GLuint IBO;
 GLuint gWorldLocation; // Указатель для доступа к всемирной матрице
 
-Camera GameCamera;
+Camera* pGameCamera = NULL;
 
 // Код шейдера
 static const char* pVS = "                                                          \n\
@@ -51,6 +52,7 @@ void main()                                                                     
 
 static void RenderSceneCB()
 {
+    pGameCamera->OnRender();
     glClear(GL_COLOR_BUFFER_BIT); // Очищение буфера кадра 
 
     static float Scale = 0.0f;
@@ -58,16 +60,10 @@ static void RenderSceneCB()
     Scale += 0.01f;
 
     Pipeline p;
-    p.Rotate(0.0f, Scale, 0.0f); // Вращение по X, Y, Z
-    p.WorldPos(0.0f, 0.0f, 5.0f);
-
-    Vector3f CameraPos(0.0f, 6.0f, 8.0f); // Позиция камеры
-    Vector3f CameraTarget(0.0f, -13.0f, -7.0f); // Точка, на которую смотрит камера
-    Vector3f CameraUp(0.0f, 1.0f, 0.0f); // Вектор, направленный вверх
-
-    p.SetCamera(CameraPos, CameraTarget, CameraUp);
-    p.SetPerspectiveProj(30.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 10.0f);
-    p.SetCamera(GameCamera.GetPos(), GameCamera.GetTarget(), GameCamera.GetUp());
+    p.Rotate(0.0f, Scale, 0.0f);
+    p.WorldPos(0.0f, 0.0f, 3.0f);
+    p.SetCamera(pGameCamera->GetPos(), pGameCamera->GetTarget(), pGameCamera->GetUp());
+    p.SetPerspectiveProj(60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f);
 
     glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, (const GLfloat*)p.GetTrans()); // Загружаем матрицу в шейдер
     // Передаём адрес uniform-переменной. Кол-во матриц, к. мы обрабатываем. Строковый порядок. Сама матрица
@@ -85,14 +81,30 @@ static void RenderSceneCB()
 }
 
 static void SpecialKeyboardCB(int Key, int x, int y) {
-    GameCamera.OnKeyboard(Key);
+    pGameCamera->OnKeyboard(Key);
 }
+
+static void KeyboardCB(unsigned char Key, int x, int y)
+{
+    switch (Key) {
+    case 'q':
+        exit(0);
+    }
+}
+
+static void PassiveMouseCB(int x, int y)
+{
+    pGameCamera->OnMouse(x, y);
+}
+
 
 static void InitializeGlutCallbacks()
 {
     glutDisplayFunc(RenderSceneCB);
     glutIdleFunc(RenderSceneCB);
     glutSpecialFunc(SpecialKeyboardCB);
+    glutPassiveMotionFunc(PassiveMouseCB);
+    glutKeyboardFunc(KeyboardCB);
 }
 
 static void CreateVertexBuffer()
@@ -192,8 +204,12 @@ int main(int argc, char** argv)
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT); // Задаём размер окна
     glutInitWindowPosition(100, 100); // Позицию окна
     glutCreateWindow("Something"); // Создаём окно и задаём ему заголовок
+    glutGameModeString("1280x1024@32");
+    glutEnterGameMode();
 
     InitializeGlutCallbacks();
+
+    pGameCamera = new Camera(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     GLenum res = glewInit(); // Инициализируем GLEW
     if (res != GLEW_OK) { // Проверяем на ошибку

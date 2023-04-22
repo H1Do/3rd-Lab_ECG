@@ -5,6 +5,12 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+struct Vector2i
+{
+	int x;
+	int y;
+};
+
 struct Vector3f { // Вектор в 3-мерном пространстве
 	float x, y, z;
 
@@ -35,6 +41,13 @@ struct Vector3f { // Вектор в 3-мерном пространстве
 		z *= f;
 
 		return *this;
+	}
+
+	void Rotate(float Angle, const Vector3f& Axis);
+
+	void Print() const
+	{
+		printf("(%.02f, %.02f, %.02f", x, y, z);
 	}
 };
 
@@ -89,5 +102,20 @@ struct Matrix4f { // Матрица размера 4 на 4
 	void InitCameraTransform(const Vector3f& Target, const Vector3f& Up);
 	void InitPersProjTransform(float FOV, float Width, float Height, float zNear, float zFar);
 };
+
+struct Quaternion
+{
+	float x, y, z, w;
+
+	Quaternion(float _x, float _y, float _z, float _w);
+
+	void Normalize();
+
+	Quaternion Conjugate();
+};
+
+Quaternion operator*(const Quaternion& l, const Quaternion& r);
+
+Quaternion operator*(const Quaternion& q, const Vector3f& v);
 
 #endif /* MATH_3D_H */
