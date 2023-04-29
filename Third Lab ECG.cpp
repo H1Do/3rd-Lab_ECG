@@ -1,23 +1,30 @@
-﻿#include <math.h>
+﻿// Подключаем необходимые библиотеки
+#include <math.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+
+// Подключаем модули нашего проекта
 #include "pipeline.h"
 #include "camera.h"
 #include "texture.h"
 #include "lighting_technique.h"
 #include "glut_backend.h"
 
+
+// Подключаем реализации модулей нашего проекта
 #include "pipeline.cpp"
-#include "camera.cpp"
-#include "texture.cpp"
+#include "camera.cpp"\n#include "texture.cpp"
 #include "lighting_technique.cpp"
 #include "glut_backend.cpp"
 #include "util.h"
 
-#define WINDOW_WIDTH  1280
+
+// Определяем размеры окна
+#define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 1024
 
+// Создаем структуру Vertex, описывающую вершину меша
 struct Vertex
 {
     Vector3f m_pos;
@@ -34,10 +41,12 @@ struct Vertex
     }
 };
 
+// Определяем класс нашего приложения Main, наследующий интерфейс ICallbacks для работы с GLUT
 class Main : public ICallbacks
 {
 public:
 
+    // Конструктор класса Main
     Main()
     {
         m_pGameCamera = NULL;
@@ -50,6 +59,7 @@ public:
         m_directionalLight.Direction = Vector3f(1.0f, 0.0f, 0.0f);
     }
 
+    // Деструктор класса Main
     ~Main()
     {
         delete m_pEffect;
@@ -57,6 +67,7 @@ public:
         delete m_pTexture;
     }
 
+    // Функция инициализации приложения
     bool Init()
     {
         Vector3f Pos(-10.0f, 0.0f, -10.0f);
@@ -92,11 +103,13 @@ public:
         return true;
     }
 
+    // Функция запуска главного цикла приложения
     void Run()
     {
         GLUTBackendRun(this);
     }
 
+    // Функция, вызываемая в каждой итерации основного цикла для отображения сцены на экране
     virtual void RenderSceneCB()
     {
         m_pGameCamera->OnRender();
@@ -105,14 +118,19 @@ public:
 
         m_scale += 0.01f;
 
+        // Создание двух точечных источников света
         SpotLight sl[2];
-        sl[0].DiffuseIntensity = 15.0f;
+
+        // Настройка параметров для первого источника света
+        sl[0].DiffuseIntensity = 15.0f; 
         sl[0].Color = Vector3f(1.0f, 1.0f, 0.7f);
         sl[0].Position = Vector3f(-0.0f, -1.9f, -0.0f);
         sl[0].Direction = Vector3f(sinf(m_scale), 0.0f, cosf(m_scale));
         sl[0].Attenuation.Linear = 0.1f;
         sl[0].Cutoff = 20.0f;
 
+
+        // Настройка параметров для второго источника света
         sl[1].DiffuseIntensity = 5.0f;
         sl[1].Color = Vector3f(0.0f, 1.0f, 1.0f);
         sl[1].Position = m_pGameCamera->GetPos();
@@ -120,6 +138,8 @@ public:
         sl[1].Attenuation.Linear = 0.1f;
         sl[1].Cutoff = 10.0f;
 
+
+        // Привязка источников света к шейдерной программе
         m_pEffect->SetSpotLights(2, sl);
 
 
@@ -172,24 +192,20 @@ public:
             glutLeaveMainLoop();
             break;
 
-        case 'a':
-            m_directionalLight.AmbientIntensity += 0.05f;
+        case 'a': // Если нажата клавиша a
+            m_directionalLight.AmbientIntensity += 0.05f; // Увеличить интенсивность фонового света на 0.05
             break;
-
-        case 's':
-            m_directionalLight.AmbientIntensity -= 0.05f;
+        case 's': // Если нажата клавиша s
+            m_directionalLight.AmbientIntensity -= 0.05f; // Уменьшить интенсивность фонового света на 0.05
             break;
-
-        case 'z':
-            m_directionalLight.DiffuseIntensity += 0.05f;
+        case 'z': // Если нажата клавиша z
+            m_directionalLight.DiffuseIntensity += 0.05f; // Увеличить интенсивность рассеянного света на 0.05
+            break
+        case 'x': // Если нажата клавиша x
+            m_directionalLight.DiffuseIntensity -= 0.05f; // Уменьшить интенсивность рассеянного света на 0.05
             break;
-
-        case 'x':
-            m_directionalLight.DiffuseIntensity -= 0.05f;
-            break;
-        }
     }
-
+}
 
     virtual void PassiveMouseCB(int x, int y)
     {
@@ -219,7 +235,7 @@ private:
         }
     }
 
-
+    // Создать буффер вершин
     void CreateVertexBuffer(const unsigned int* pIndices, unsigned int IndexCount)
     {
         Vertex Vertices[4] = { Vertex(Vector3f(-10.0f, -2.0f, -10.0f), Vector2f(0.0f, 0.0f)),
@@ -236,6 +252,7 @@ private:
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
     }
 
+    // Создать буффер индексов
     void CreateIndexBuffer(const unsigned int* pIndices, unsigned int SizeInBytes)
     {
         glGenBuffers(1, &m_IBO);
@@ -256,21 +273,27 @@ private:
 
 int main(int argc, char** argv)
 {
+    // Инициализация OpenGL бэкенда
     GLUTBackendInit(argc, argv);
 
+    // Создание окна приложения с заданными параметрами
     if (!GLUTBackendCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 32, false, "OpenGL tutors")) {
-        return 1;
+        // В случае неудачи завершаем работу программы и возвращаем код ошибки\n        return 1;
     }
 
+    // Создание экземпляра класса Main
     Main* pApp = new Main();
 
+    // Инициализация экземпляра класса Main
     if (!pApp->Init()) {
+        // В случае неудачи завершаем работу программы и возвращаем код ошибки
         return 1;
     }
 
-    pApp->Run();
-
+    // Запуск главного цикла приложения
+    pApp->Run();\n\n    // Освобождение памяти, выделенной под экземпляр класса Main
     delete pApp;
 
+    // Возвращаем 0 в случае успешного завершения программы
     return 0;
 }
